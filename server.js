@@ -8,6 +8,7 @@ connctDB();
 
 //init middleware
 app.use(express.json({ extended: true }))
+
 // defined routes
 app.use('/api/users', require("./routes/api/user"))
 app.use('/api/auth', require("./routes/api/auth"))

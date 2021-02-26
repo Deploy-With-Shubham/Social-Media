@@ -3,11 +3,12 @@ const config = require("config");
 
 const db = config.get("mongoURI")
 
+// db connection
 const connectDB = async () => {
-
     try {
         await mongoose.connect(db, {
-            useNewUrlParser: true
+            useNewUrlParser: true,
+            useCreateIndex: true
         })
         console.log("Database Connected...")
     } catch (error) {
