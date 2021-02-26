@@ -40,7 +40,7 @@ router.post('/',
                 avatar,
                 password=req.body.password
             })
-            // encrypting the password   
+            // encrypting the password into hash  
             const salt = await bcrypt.genSalt(10)
             user.password = await bcrypt.hash(password, salt) // it creates a hash of the password
             await user.save();
