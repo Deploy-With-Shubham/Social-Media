@@ -8,19 +8,23 @@ const { check, validationResult } = require("express-validator");
 //@routr   api/profile/me
 //@desc    get current user profile
 //@access  Public
+
 router.get('/me', auth, async (req, res) => {
     try {
-
-        const profile = await Profile.findOne({
-            user: req.user.id
-        }).populate('user', ['name', 'avatar'])
+        const profile = await Profile.findOne({ user: req.user.id }).
+            populate('User', ['name', 'avatar']);
         if (!profile) {
-            return res.status(404).json({ msg: 'there is no profile for this user' });
+            return res.status(400).json({ msg: 'There is no profile for this user' })
         }
+        res.json(profile)
+
     } catch (err) {
+        console.error(err.message);
         res.status(500).send('server error')
+
     }
 })
+
 //@routr   api/profile/
 //@desc    create or update user profile
 //@access  Private
@@ -94,15 +98,117 @@ router.post('/', [auth, [
 //@desc    get profile data
 //@access  Private
 
-router.get('/', async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
-        console.log('*************** Check before ******************', Profile)
-        const profiles = await Profile.find().populate('user', ['name', 'avatar'])
-        console.log('*************** Check after ******************')
-        res.json(profiles)
+        const profiles = await Profile.find().populate('User', ['name', 'avatar']);
+        res.json(profiles);
     } catch (err) {
         console.error(err.message);
-        res.status(500).send('server Error');
+        res.status(500).send('server error in route /')
+
     }
 })
+//@routr   api/profile/user/user_id
+//@desc    get profile by user id
+//@access  piblic
+
+router.get('/user/:user_id', async (req, res) => {
+    try {
+        const profile = await Profile.findOne({ user: req.params.user_id }).populate('user', ['name', 'avatar']);
+        if (!profile) {
+            return res.status(400).json({ msg: 'There is no profile for this user' })
+        }
+        res.json(profile);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            res.status(500).send('There is no profile of this ID')
+        }
+    }
+})
+//@routr   DELETE api/profile
+//@desc    Delete profile, user & posts
+//@access  piblic
+
+router.delete('/', auth, async (req, res) => {
+    try {
+        // @todo -remove users posts
+
+
+        // Remove profile
+        // await Profile .deleteOne({user: req.user.id})
+        await Profile.deleteOne({ user: req.user.id }, (err) => {
+            if (!err) {
+                res.json({ msg: 'Profile Deleted' })
+            }
+            else {
+                res.json({ msg: 'error in deleting' })
+            }
+        })
+        // Remove User
+        await User.findOneAndRemove({ _id: req.user.id });
+        res.json({ msg: 'User Deleted' });
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error')
+    }
+})
+//@routr   PUT api/profile/experience
+//@desc    Add profile experience
+//@access  private
+
+router.put('/experience',
+    [
+        auth,
+        [
+            check('title', 'Title is required').
+                not().
+                isEmpty(),
+            check('company', 'Company is required').
+                not().
+                isEmpty()
+
+        ]
+    ],
+    async (req, res) => {
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const {
+            title,
+            company,
+            location,
+            from,
+            to,
+            corrent,
+            description
+        } = req.body;
+
+        const newExp = {
+            title,
+            company,
+            location,
+            from,
+            to,
+            corrent,
+            description
+        }
+
+        try {
+            const profile = await Profile.findOne({ user: req.user.id });
+            profile.experience.unshift(newExp);
+
+            await profile.save();
+
+            res.json(profile)
+
+        } catch (err) {
+            console.error(err.message);
+            res.status(500).send('Server Error')
+        }
+
+    })
+
 module.exports = router;

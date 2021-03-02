@@ -35,7 +35,7 @@ router.post('/',
         }
         const { email, password } = req.body;
         try {
-            let user = await User.findOne({ email })    // user already exist validation
+            let user = await User.findOne({ email })    //checking provided email exist in User table
             if (!user) {
                 return res.status(400).json({ errors: [{ msg: "invalid credentials" }] })
             }
