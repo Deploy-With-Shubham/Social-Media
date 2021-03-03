@@ -37,22 +37,27 @@ const profileSchema = new mongoose.Schema({
                 type: String
             },
             location: {
-                type: {
-                    type: String
-                },
-                from: {
-                    type: Date,
-                    required: true
-                },
-                to: {
-                    type: Date
-                },
-                current: {
-                    type: Boolean,
-                    default: false
-                }
+
+                type: String
+            },
+
+            from: {
+                type: Date,
+                required: true
+            },
+            to: {
+                type: Date
+            },
+            description: {
+                type: String,
+                reqired: true
+            },
+            current: {
+                type: Boolean,
+                default: false
             }
         }
+
     ],
     education: [
         {
