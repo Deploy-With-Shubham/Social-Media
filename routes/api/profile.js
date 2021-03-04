@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const requst = require("requst");
+const config = require('config')
 const auth = require("../../middleware/auth");
 const Profile = require("../../models/profile");
 const User = require("../../models//userModel");
@@ -301,7 +303,20 @@ router.delete('/education/:edu_id', auth, async (req, res) => {
     }
 })
 //@routr   GET api/github/:username 
-//@desc    Add profile experience
-//@access  private
+//@desc    Get user repo from github profile
+//@access  public
+
+router.get('/github/:username', (req, res) => {
+    try {
+        const options = {
+            uri: `https://api.github.com/users/${req.params.username}/repos`
+        }
+    } catch (err) {
+        console.error(err.message)
+        res.status(500).send('Server Error')
+
+    }
+})
+
 
 module.exports = router;
